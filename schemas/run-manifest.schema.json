@@ -1,0 +1,89 @@
+{
+  "$defs": {
+    "Split": {
+      "enum": [
+        "development",
+        "validation",
+        "challenge"
+      ],
+      "title": "Split",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "benchmark_version": {
+      "title": "Benchmark Version",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "adapter": {
+      "title": "Adapter",
+      "type": "string"
+    },
+    "adapter_version": {
+      "title": "Adapter Version",
+      "type": "string"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Model"
+    },
+    "dataset_sha256": {
+      "title": "Dataset Sha256",
+      "type": "string"
+    },
+    "dataset_split": {
+      "$ref": "#/$defs/Split"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "git_commit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Git Commit"
+    },
+    "config": {
+      "additionalProperties": true,
+      "title": "Config",
+      "type": "object"
+    }
+  },
+  "required": [
+    "benchmark_version",
+    "run_id",
+    "adapter",
+    "adapter_version",
+    "model",
+    "dataset_sha256",
+    "dataset_split",
+    "seed",
+    "created_at",
+    "git_commit",
+    "config"
+  ],
+  "title": "RunManifest",
+  "type": "object"
+}

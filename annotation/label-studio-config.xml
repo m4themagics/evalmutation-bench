@@ -1,0 +1,22 @@
+<View>
+  <Header value="Compare the control and candidate traces. Judge behavior, not style."/>
+  <Text name="scenario" value="$scenario"/>
+  <Text name="control" value="$control"/>
+  <Text name="candidate" value="$candidate"/>
+  <Choices name="regression" toName="candidate" choice="single" required="true">
+    <Choice value="regression"/>
+    <Choice value="control"/>
+  </Choices>
+  <Choices name="failure_family" toName="candidate" choice="single" required="true">
+    <Choice value="none"/>
+    <Choice value="retrieval"/>
+    <Choice value="answer"/>
+    <Choice value="tools"/>
+    <Choice value="state_policy"/>
+  </Choices>
+  <Rating name="severity" toName="candidate" maxRating="3" required="true"/>
+  <Rating name="confidence" toName="candidate" maxRating="5" required="true"/>
+  <TextArea name="evidence_paths" toName="candidate" placeholder="One trace path per line"/>
+  <TextArea name="notes" toName="candidate" optional="true"/>
+</View>
+

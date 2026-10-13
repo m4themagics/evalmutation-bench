@@ -1,0 +1,3 @@
+model: openai/your-model-id
+temperature: 0.0
+

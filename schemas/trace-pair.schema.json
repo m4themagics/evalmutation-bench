@@ -1,0 +1,416 @@
+{
+  "$defs": {
+    "Domain": {
+      "enum": [
+        "customer_support",
+        "procurement",
+        "travel_operations"
+      ],
+      "title": "Domain",
+      "type": "string"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "is_current": {
+          "title": "Is Current",
+          "type": "boolean"
+        },
+        "source_uri": {
+          "title": "Source Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "title",
+        "content",
+        "version",
+        "is_current",
+        "source_uri"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "FailureFamily": {
+      "enum": [
+        "none",
+        "retrieval",
+        "answer",
+        "tools",
+        "state_policy"
+      ],
+      "title": "FailureFamily",
+      "type": "string"
+    },
+    "GoldLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "regression": {
+          "title": "Regression",
+          "type": "boolean"
+        },
+        "failure_family": {
+          "$ref": "#/$defs/FailureFamily"
+        },
+        "mutation_type": {
+          "$ref": "#/$defs/MutationType"
+        },
+        "severity": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "label_source": {
+          "enum": [
+            "synthetic_oracle",
+            "human_adjudicated"
+          ],
+          "title": "Label Source",
+          "type": "string"
+        },
+        "evidence_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "regression",
+        "failure_family",
+        "mutation_type",
+        "severity",
+        "label_source",
+        "evidence_paths"
+      ],
+      "title": "GoldLabel",
+      "type": "object"
+    },
+    "Message": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "system",
+            "user",
+            "assistant",
+            "tool"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "Message",
+      "type": "object"
+    },
+    "MutationType": {
+      "enum": [
+        "semantic_paraphrase",
+        "evidence_reorder",
+        "concise_valid_answer",
+        "stale_evidence",
+        "missing_evidence",
+        "wrong_evidence",
+        "truncated_evidence",
+        "unsupported_claim",
+        "omitted_constraint",
+        "wrong_citation",
+        "wrong_tool",
+        "wrong_arguments",
+        "silent_corruption",
+        "ignored_timeout",
+        "tool_loop",
+        "missing_approval",
+        "permission_violation",
+        "cross_session_state",
+        "partial_commit"
+      ],
+      "title": "MutationType",
+      "type": "string"
+    },
+    "Scenario": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "domain": {
+          "$ref": "#/$defs/Domain"
+        },
+        "instruction": {
+          "title": "Instruction",
+          "type": "string"
+        },
+        "policy": {
+          "title": "Policy",
+          "type": "string"
+        },
+        "allowed_tools": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Tools",
+          "type": "array"
+        },
+        "required_evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Evidence Ids",
+          "type": "array"
+        },
+        "required_approvals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Approvals",
+          "type": "array"
+        },
+        "initial_state": {
+          "additionalProperties": true,
+          "title": "Initial State",
+          "type": "object"
+        },
+        "expected_state": {
+          "additionalProperties": true,
+          "title": "Expected State",
+          "type": "object"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "domain",
+        "instruction",
+        "policy",
+        "allowed_tools",
+        "required_evidence_ids",
+        "required_approvals",
+        "initial_state",
+        "expected_state"
+      ],
+      "title": "Scenario",
+      "type": "object"
+    },
+    "Split": {
+      "enum": [
+        "development",
+        "validation",
+        "challenge"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "ToolCall": {
+      "additionalProperties": false,
+      "properties": {
+        "call_id": {
+          "title": "Call Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "arguments": {
+          "additionalProperties": true,
+          "title": "Arguments",
+          "type": "object"
+        }
+      },
+      "required": [
+        "call_id",
+        "name",
+        "arguments"
+      ],
+      "title": "ToolCall",
+      "type": "object"
+    },
+    "ToolResult": {
+      "additionalProperties": false,
+      "properties": {
+        "call_id": {
+          "title": "Call Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "timeout",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "output": {
+          "additionalProperties": true,
+          "title": "Output",
+          "type": "object"
+        }
+      },
+      "required": [
+        "call_id",
+        "status",
+        "output"
+      ],
+      "title": "ToolResult",
+      "type": "object"
+    },
+    "Trace": {
+      "additionalProperties": false,
+      "properties": {
+        "trace_id": {
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/Message"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "retrieval": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Retrieval",
+          "type": "array"
+        },
+        "tool_calls": {
+          "items": {
+            "$ref": "#/$defs/ToolCall"
+          },
+          "title": "Tool Calls",
+          "type": "array"
+        },
+        "tool_results": {
+          "items": {
+            "$ref": "#/$defs/ToolResult"
+          },
+          "title": "Tool Results",
+          "type": "array"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "approvals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Approvals",
+          "type": "array"
+        },
+        "final_answer": {
+          "title": "Final Answer",
+          "type": "string"
+        },
+        "state_before": {
+          "additionalProperties": true,
+          "title": "State Before",
+          "type": "object"
+        },
+        "state_after": {
+          "additionalProperties": true,
+          "title": "State After",
+          "type": "object"
+        }
+      },
+      "required": [
+        "trace_id",
+        "messages",
+        "retrieval",
+        "tool_calls",
+        "tool_results",
+        "citations",
+        "approvals",
+        "final_answer",
+        "state_before",
+        "state_after"
+      ],
+      "title": "Trace",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "benchmark_version": {
+      "title": "Benchmark Version",
+      "type": "string"
+    },
+    "pair_id": {
+      "title": "Pair Id",
+      "type": "string"
+    },
+    "scenario_group": {
+      "title": "Scenario Group",
+      "type": "string"
+    },
+    "split": {
+      "$ref": "#/$defs/Split"
+    },
+    "scenario": {
+      "$ref": "#/$defs/Scenario"
+    },
+    "control": {
+      "$ref": "#/$defs/Trace"
+    },
+    "candidate": {
+      "$ref": "#/$defs/Trace"
+    },
+    "gold": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GoldLabel"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "benchmark_version",
+    "pair_id",
+    "scenario_group",
+    "split",
+    "scenario",
+    "control",
+    "candidate"
+  ],
+  "title": "TracePair",
+  "type": "object"
+}

@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "FailureFamily": {
+      "enum": [
+        "none",
+        "retrieval",
+        "answer",
+        "tools",
+        "state_policy"
+      ],
+      "title": "FailureFamily",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "pair_id": {
+      "title": "Pair Id",
+      "type": "string"
+    },
+    "reviewer_id": {
+      "title": "Reviewer Id",
+      "type": "string"
+    },
+    "regression": {
+      "title": "Regression",
+      "type": "boolean"
+    },
+    "failure_family": {
+      "$ref": "#/$defs/FailureFamily"
+    },
+    "severity": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Severity",
+      "type": "integer"
+    },
+    "confidence": {
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Confidence",
+      "type": "integer"
+    },
+    "evidence_paths": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Paths",
+      "type": "array"
+    },
+    "notes": {
+      "default": "",
+      "title": "Notes",
+      "type": "string"
+    }
+  },
+  "required": [
+    "pair_id",
+    "reviewer_id",
+    "regression",
+    "failure_family",
+    "severity",
+    "confidence",
+    "evidence_paths"
+  ],
+  "title": "HumanJudgment",
+  "type": "object"
+}

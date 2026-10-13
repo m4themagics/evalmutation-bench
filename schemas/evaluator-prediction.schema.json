@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "FailureFamily": {
+      "enum": [
+        "none",
+        "retrieval",
+        "answer",
+        "tools",
+        "state_policy"
+      ],
+      "title": "FailureFamily",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "pair_id": {
+      "title": "Pair Id",
+      "type": "string"
+    },
+    "regression_probability": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Regression Probability",
+      "type": "number"
+    },
+    "predicted_regression": {
+      "title": "Predicted Regression",
+      "type": "boolean"
+    },
+    "predicted_failure_family": {
+      "$ref": "#/$defs/FailureFamily"
+    },
+    "predicted_severity": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Predicted Severity",
+      "type": "integer"
+    },
+    "explanation": {
+      "title": "Explanation",
+      "type": "string"
+    },
+    "evidence_paths": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Paths",
+      "type": "array"
+    },
+    "latency_ms": {
+      "minimum": 0.0,
+      "title": "Latency Ms",
+      "type": "number"
+    },
+    "cost_usd": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cost Usd"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    }
+  },
+  "required": [
+    "pair_id",
+    "regression_probability",
+    "predicted_regression",
+    "predicted_failure_family",
+    "predicted_severity",
+    "explanation",
+    "evidence_paths",
+    "latency_ms"
+  ],
+  "title": "EvaluatorPrediction",
+  "type": "object"
+}

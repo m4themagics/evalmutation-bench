@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.venv/
+.coverage
+.uv-cache/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+artifacts/*
+!artifacts/.gitkeep
+maintainer_private/
+

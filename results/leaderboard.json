@@ -1,0 +1,17 @@
+{
+  "benchmark_version": "0.1.0",
+  "dataset_split": "development",
+  "label_status": "synthetic_oracle",
+  "entries": [
+    {
+      "system": "Deterministic invariant checker",
+      "balanced_accuracy": 0.9667,
+      "specificity": 1.0,
+      "localization_macro_f1": 0.8975,
+      "cost_per_1000_pairs_usd": 0.0,
+      "latency_p95_ms": null,
+      "evidence": "Recomputed by make smoke; latency omitted because local microtiming is not portable."
+    }
+  ]
+}
+

@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use EvalMutationBench, cite the software release."
+title: "EvalMutationBench: Mutation Testing for LLM Evaluation Systems"
+type: software
+version: 0.1.0
+date-released: 2026-10-13
+license: Apache-2.0
+authors:
+  - name: EvalMutationBench contributors
+
