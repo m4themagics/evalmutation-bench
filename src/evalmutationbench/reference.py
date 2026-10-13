@@ -64,7 +64,7 @@ class AgentState(TypedDict):
 def build_langgraph_reference() -> Any:
     """Build the optional checkpoint-friendly deterministic reference graph."""
     try:
-        from langgraph.graph import END, START, StateGraph  # type: ignore[import-not-found]
+        from langgraph.graph import END, START, StateGraph
     except ImportError as exc:
         raise RuntimeError("install the reference extra: uv sync --extra reference") from exc
 

@@ -19,6 +19,7 @@ services:
       EVALMUT_DATABASE_URL: postgresql+asyncpg://evalmut:${EVALMUT_DB_PASSWORD}@db:5432/evalmut
       EVALMUT_SERVICE_TOKEN: ${EVALMUT_SERVICE_TOKEN:?Set a service token of at least 32 characters}
       EVALMUT_MODEL: ${EVALMUT_MODEL:-}
+      EVALMUT_RETAIL_ENABLED: "1"
     depends_on:
       db:
         condition: service_healthy
@@ -26,7 +27,7 @@ services:
     build: .
     environment: *service-environment
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:${EVALMUT_API_PORT:-8000}:8000"
     depends_on:
       init:
         condition: service_completed_successfully

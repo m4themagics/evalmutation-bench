@@ -10,6 +10,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict
 
 from ..io import dataset_sha256
+from ..retail.models import ApprovalRequest, RetailRequest
+from ..retail.store import RetailConflict, RetailStore
 from .settings import Settings
 from .store import IdempotencyConflict, RunStore
 
@@ -96,5 +98,50 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if row is None:
             raise HTTPException(404, "Run not found")
         return row
+
+    if settings.retail_enabled:
+        retail = RetailStore(store)
+
+        @app.post(
+            "/v1/retail/sessions",
+            status_code=202,
+            response_model=RunResponse,
+            dependencies=[Depends(authenticate)],
+        )
+        async def start_retail(
+            request: RetailRequest,
+            idempotency_key: Annotated[str, Header(min_length=1, max_length=128)],
+        ) -> dict[str, Any]:
+            try:
+                return await retail.start(idempotency_key, request, {
+                    "mode": settings.retail_retrieval_mode,
+                    "embedding_model": settings.retail_embedding_model,
+                    "reranker_model": settings.retail_reranker_model,
+                })
+            except IdempotencyConflict:
+                raise HTTPException(409, "Idempotency key belongs to a different request") from None
+
+        @app.get("/v1/retail/sessions/{session_id}", dependencies=[Depends(authenticate)])
+        async def get_retail(session_id: UUID) -> dict[str, Any]:
+            session = await retail.get_session(str(session_id))
+            if session is None:
+                raise HTTPException(404, "Session not found")
+            return session
+
+        @app.post(
+            "/v1/retail/sessions/{session_id}/approval",
+            status_code=202,
+            response_model=RunResponse,
+            dependencies=[Depends(authenticate)],
+        )
+        async def approve_retail(
+            session_id: UUID,
+            request: ApprovalRequest,
+            idempotency_key: Annotated[str, Header(min_length=1, max_length=128)],
+        ) -> dict[str, Any]:
+            try:
+                return await retail.approve(idempotency_key, str(session_id), request)
+            except (RetailConflict, IdempotencyConflict):
+                raise HTTPException(409, "Approval conflicts with the current proposal") from None
 
     return app

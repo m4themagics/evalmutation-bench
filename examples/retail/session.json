@@ -1,0 +1,154 @@
+{
+  "session_id": "c5e82b3a-80ca-562d-b2c4-5aa2da31a1ef",
+  "sku": "COFFEE-001",
+  "target_days": 14,
+  "phase": "ordered",
+  "proposal": {
+    "sku": "COFFEE-001",
+    "quantity": 120,
+    "total_cost_cents": 60000,
+    "inventory_revision": 1,
+    "target_days": 14,
+    "citations": [
+      "COFFEE-001-supplier-v1",
+      "COFFEE-001-policy-v1"
+    ],
+    "evidence_sha256": "888cc61bc20295b6bcd5d2af50947d75fc0d0d244b2c3ef560d8d143bc48447c",
+    "explanation": "70 units sold in 7 days; 14-day target is 140; 20 on hand. Round deficit 120 to supplier packs of 10: order 120 units. Policy cap: 500. Human approval is required."
+  },
+  "proposal_sha256": "2860153510d33c9f0bd149d347e5cc725bb91f086cb6b58fea609ae9a936029e",
+  "decision": true,
+  "approval_run_id": "3bccc3d8-dc90-45dc-87a9-3cbfeeb19182",
+  "trace": {
+    "trace_id": "c5e82b3a-80ca-562d-b2c4-5aa2da31a1ef",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Replenish COFFEE-001 for 14 days."
+      },
+      {
+        "role": "assistant",
+        "content": "70 units sold in 7 days; 14-day target is 140; 20 on hand. Round deficit 120 to supplier packs of 10: order 120 units. Policy cap: 500. Human approval is required."
+      }
+    ],
+    "retrieval": [
+      {
+        "evidence_id": "COFFEE-001-supplier-v1",
+        "title": "COFFEE-001 supplier terms",
+        "content": "COFFEE-001 purchase quantities must be multiples of 10 units.",
+        "version": 1,
+        "is_current": true,
+        "source_uri": "retail://supplier/COFFEE-001/v1"
+      },
+      {
+        "evidence_id": "COFFEE-001-policy-v1",
+        "title": "COFFEE-001 policy terms",
+        "content": "COFFEE-001 replenishment limit is 500 units. Human approval is required.",
+        "version": 1,
+        "is_current": true,
+        "source_uri": "retail://policy/COFFEE-001/v1"
+      }
+    ],
+    "tool_calls": [
+      {
+        "call_id": "inventory",
+        "name": "get_inventory",
+        "arguments": {
+          "sku": "COFFEE-001"
+        }
+      },
+      {
+        "call_id": "sources",
+        "name": "retrieve_supplier_policy",
+        "arguments": {
+          "sku": "COFFEE-001"
+        }
+      },
+      {
+        "call_id": "approval",
+        "name": "human_approval",
+        "arguments": {
+          "proposal_sha256": "2860153510d33c9f0bd149d347e5cc725bb91f086cb6b58fea609ae9a936029e"
+        }
+      },
+      {
+        "call_id": "order",
+        "name": "create_purchase_order",
+        "arguments": {
+          "sku": "COFFEE-001",
+          "quantity": 120
+        }
+      }
+    ],
+    "tool_results": [
+      {
+        "call_id": "inventory",
+        "status": "ok",
+        "output": {
+          "sku": "COFFEE-001",
+          "on_hand": 20,
+          "sold_last_7_days": 70,
+          "unit_cost_cents": 500,
+          "revision": 1
+        }
+      },
+      {
+        "call_id": "sources",
+        "status": "ok",
+        "output": {
+          "citations": [
+            "COFFEE-001-supplier-v1",
+            "COFFEE-001-policy-v1"
+          ]
+        }
+      },
+      {
+        "call_id": "approval",
+        "status": "ok",
+        "output": {
+          "approved": true
+        }
+      },
+      {
+        "call_id": "order",
+        "status": "ok",
+        "output": {
+          "order_id": "41b34d47-0eb7-494e-9ec5-25a5d2b7a250",
+          "committed": true
+        }
+      }
+    ],
+    "citations": [
+      "COFFEE-001-supplier-v1",
+      "COFFEE-001-policy-v1"
+    ],
+    "approvals": [
+      "human:2860153510d33c9f0bd149d347e5cc725bb91f086cb6b58fea609ae9a936029e"
+    ],
+    "final_answer": "70 units sold in 7 days; 14-day target is 140; 20 on hand. Round deficit 120 to supplier packs of 10: order 120 units. Policy cap: 500. Human approval is required. Decision: ordered.",
+    "state_before": {
+      "sku": "COFFEE-001",
+      "on_hand": 20,
+      "sold_last_7_days": 70,
+      "unit_cost_cents": 500,
+      "revision": 1
+    },
+    "state_after": {
+      "sku": "COFFEE-001",
+      "on_hand": 20,
+      "sold_last_7_days": 70,
+      "unit_cost_cents": 500,
+      "revision": 1,
+      "order_id": "41b34d47-0eb7-494e-9ec5-25a5d2b7a250",
+      "phase": "ordered"
+    }
+  },
+  "order": {
+    "order_id": "41b34d47-0eb7-494e-9ec5-25a5d2b7a250",
+    "session_id": "c5e82b3a-80ca-562d-b2c4-5aa2da31a1ef",
+    "sku": "COFFEE-001",
+    "quantity": 120,
+    "total_cost_cents": 60000,
+    "proposal_sha256": "2860153510d33c9f0bd149d347e5cc725bb91f086cb6b58fea609ae9a936029e"
+  }
+}

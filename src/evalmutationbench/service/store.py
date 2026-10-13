@@ -46,6 +46,8 @@ class RunStore:
 
     async def initialize(self) -> None:
         """Explicit initial-schema creation; never run DDL during API startup."""
+        from ..retail import tables  # noqa: F401 - register additive tables
+
         async with self.engine.begin() as connection:
             await connection.run_sync(metadata.create_all)
 
@@ -70,6 +72,10 @@ class RunStore:
                         created_at=time.time(),
                     )
                 )
+                if request.get("kind") in ("retail_start", "retail_approval"):
+                    from ..retail.store import RetailStore
+
+                    await RetailStore(self).prepare_enqueue(connection, run_id, request)
         except IntegrityError:
             async with self.engine.connect() as connection:
                 existing = (
@@ -170,6 +176,10 @@ def main() -> None:
         store = RunStore(settings.database_url.get_secret_value())
         try:
             await store.initialize()
+            if settings.retail_enabled:
+                from ..retail.runtime import initialize as initialize_retail
+
+                await initialize_retail(store)
         finally:
             await store.close()
 

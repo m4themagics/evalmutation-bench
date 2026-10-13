@@ -31,7 +31,22 @@ This project is public code, not claimed production banking experience. Its
 service demonstrates Python backend design; benchmark validity still requires
 the reviewer and external model work below.
 
-## v0.5 — requires real external work
+## Retail reference — first milestone implemented
+
+- typed SKU/horizon requests and database-backed inventory/source tools;
+- proposals with calculation, citations, and immutable source/proposal hashes;
+- durable LangGraph PostgreSQL checkpoints and human interrupt/resume;
+- transactional approval enqueue and idempotent purchase tool;
+- inventory/source freshness checks and separate session state;
+- real worker restart acceptance and reference-trace export to mutation harness;
+- optional hybrid retrieval with fusion/reranking, requiring explicit model configuration.
+
+The first milestone is an offline deterministic reference on synthetic retail
+fixtures. See [retail.md](docs/retail.md) for evidence and limits. Provider-backed
+planning, streaming/retries/budgets, measured retrieval quality, and load tests
+remain subsequent milestones. No production retail or paid model result is claimed.
+
+## v0.5 — human validation and model experiments
 
 - three independent reviewers for every pair (900 judgments);
 - adjudication of all disagreements;

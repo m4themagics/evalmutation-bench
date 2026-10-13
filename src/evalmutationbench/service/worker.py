@@ -36,6 +36,14 @@ async def process_one(store: RunStore, settings: Settings) -> bool:
     run_id, token, request = row["run_id"], row["claim_token"], row["request"]
     try:
         async with asyncio.timeout(settings.run_timeout_seconds):
+            if request.get("kind") in ("retail_start", "retail_approval"):
+                if not settings.retail_enabled:
+                    raise ValueError("retail worker is disabled")
+                from ..retail.runtime import process_job
+
+                retail_result = await process_job(store, row)
+                await store.finish(run_id, token, result=retail_result)
+                return True
             path = settings.data_dir / f"{request['split']}.jsonl"
             pairs = await asyncio.to_thread(_snapshot, path, request["dataset_sha256"])
             if not pairs or any(pair.split.value != request["split"] for pair in pairs):
@@ -83,6 +91,10 @@ async def process_one(store: RunStore, settings: Settings) -> bool:
         raise
     except Exception as exc:
         # Raw exception strings may contain provider credentials or trace content.
+        if request.get("kind") in ("retail_start", "retail_approval"):
+            from ..retail.store import RetailStore
+
+            await RetailStore(store).fail_session(request["session_id"])
         await store.finish(run_id, token, error=type(exc).__name__)
     logger.info("processed run_id=%s", run_id)
     return True

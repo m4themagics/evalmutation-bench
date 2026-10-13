@@ -3,7 +3,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md /app/
 COPY src /app/src
 RUN pip install --no-cache-dir uv==0.11.16 \
-    && uv sync --frozen --extra service --extra llm --no-dev \
+    && uv sync --frozen --extra service --extra llm --extra retail --no-dev \
     && useradd --create-home --uid 10001 evalmut
 COPY data /app/data
 USER evalmut

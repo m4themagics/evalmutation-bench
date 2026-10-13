@@ -17,11 +17,25 @@ from .dataset import BENCHMARK_VERSION, validate_split_isolation, write_dataset
 from .execution import evaluate_pairs
 from .io import dataset_sha256, load_pairs, load_predictions, write_json, write_jsonl
 from .metrics import cluster_bootstrap_ci, score_predictions
-from .models import HumanJudgment, RunManifest
+from .models import HumanJudgment, RunManifest, Trace
 from .report import write_report
 from .submission import validate_submission as check_submission
 
 app = typer.Typer(no_args_is_help=True, pretty_exceptions_show_locals=False)
+
+
+@app.command("retail-export")
+def retail_export(
+    session: Annotated[Path, typer.Option("--session")],
+    output: Annotated[Path, typer.Option("--output")] = Path("artifacts/retail-pairs.jsonl"),
+) -> None:
+    """Export mutations from a completed retail session response."""
+    from .retail.benchmark import trace_pairs
+
+    payload = json.loads(session.read_text(encoding="utf-8"))
+    pairs = trace_pairs(Trace.model_validate(payload["trace"]))
+    write_jsonl(output, pairs)
+    typer.echo(f"wrote {len(pairs)} oracle-labeled retail pairs to {output}")
 
 
 def _git_commit() -> str | None:

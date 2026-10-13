@@ -91,3 +91,32 @@ class DenseCrossEncoderRetriever:
             key=lambda item: -item.score,
         )
         return ranked[:limit]
+
+
+class HybridCrossEncoderRetriever(DenseCrossEncoderRetriever):
+    """BM25 + dense reciprocal-rank fusion, followed by CrossEncoder reranking."""
+
+    def search(
+        self, query: str, limit: int = 10, candidate_limit: int = 50
+    ) -> list[RankedEvidence]:
+        import numpy as np
+
+        lexical = BM25Retriever(self.documents).search(query, limit=candidate_limit)
+        vector = self.encoder.encode([query], normalize_embeddings=True)[0]
+        dense_scores = np.asarray(self.embeddings) @ np.asarray(vector)
+        indices = np.argsort(-dense_scores)[:candidate_limit]
+        by_id = {document.evidence_id: index for index, document in enumerate(self.documents)}
+        fused: dict[int, float] = {}
+        for ranking in (
+            [by_id[item.evidence.evidence_id] for item in lexical],
+            [int(index) for index in indices],
+        ):
+            for rank, index in enumerate(ranking, start=1):
+                fused[index] = fused.get(index, 0.0) + 1 / (60 + rank)
+        candidates = sorted(fused, key=lambda index: (-fused[index], index))[:candidate_limit]
+        scores = self.reranker.predict([(query, self.texts[index]) for index in candidates])
+        ranked = [
+            RankedEvidence(self.documents[index], float(score))
+            for index, score in zip(candidates, scores, strict=True)
+        ]
+        return sorted(ranked, key=lambda item: (-item.score, item.evidence.evidence_id))[:limit]

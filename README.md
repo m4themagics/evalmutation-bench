@@ -15,6 +15,9 @@ The benchmark is deliberately different from agent capability benchmarks. It eva
 - deterministic, pointwise, pairwise, Ragas-compatible, and DeepEval-compatible adapter entry points;
 - scoring, cluster-bootstrap confidence intervals, reports, submission validation, and CI;
 - Label Studio configuration for three-reviewer annotation.
+- a retail replenishment reference workflow with PostgreSQL LangGraph checkpoints,
+  human approval, idempotent purchase orders, and exported mutation pairs;
+  see [retail guide](docs/retail.md).
 - bounded async execution shared by CLI and a durable REST service;
 - FastAPI, SQLAlchemy/PostgreSQL queue, separate workers, bearer authentication,
   idempotent submission, and fenced expiring claims; see [service guide](docs/service.md).
@@ -26,7 +29,7 @@ The checked-in development and validation labels are **synthetic oracle labels**
 Requirements: Python 3.12 or 3.13 and `uv`.
 
 ```bash
-uv sync --extra dev --extra service
+uv sync --extra dev --extra service --extra retail
 uv run evalmut generate-dataset --output-dir data
 uv run evalmut validate-dataset data/development.jsonl data/validation.jsonl data/challenge.jsonl
 uv run evalmut run \
