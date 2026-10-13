@@ -16,6 +16,40 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-      - run: uv sync --frozen --extra dev
+      - run: uv sync --frozen --extra dev --extra service
       - run: make verify
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: evalmut
+          POSTGRES_USER: evalmut
+          POSTGRES_PASSWORD: ci-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U evalmut -d evalmut"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen --extra dev --extra service
+      - run: uv run pytest tests/test_service.py
+        env:
+          EVALMUT_TEST_DATABASE_URL: postgresql+asyncpg://evalmut:ci-test-only@localhost:5432/evalmut
+  container:
+    runs-on: ubuntu-latest
+    env:
+      EVALMUT_DB_PASSWORD: container-test-only
+      EVALMUT_SERVICE_TOKEN: container-test-token-000000000000000000000
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up --build -d
+      - run: python3 scripts/service_smoke.py
+      - if: always()
+        run: docker compose stop
 

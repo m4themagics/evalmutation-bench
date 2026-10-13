@@ -1,0 +1,11 @@
+.git
+.venv
+.env
+.env.*
+artifacts
+maintainer_private
+__pycache__
+.uv-cache
+.pytest_cache
+.mypy_cache
+.ruff_cache

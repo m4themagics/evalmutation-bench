@@ -15,6 +15,9 @@ The benchmark is deliberately different from agent capability benchmarks. It eva
 - deterministic, pointwise, pairwise, Ragas-compatible, and DeepEval-compatible adapter entry points;
 - scoring, cluster-bootstrap confidence intervals, reports, submission validation, and CI;
 - Label Studio configuration for three-reviewer annotation.
+- bounded async execution shared by CLI and a durable REST service;
+- FastAPI, SQLAlchemy/PostgreSQL queue, separate workers, bearer authentication,
+  idempotent submission, and fenced expiring claims; see [service guide](docs/service.md).
 
 The checked-in development and validation labels are **synthetic oracle labels**, not human judgments. Human calibration and external model runs are release work, not fabricated results. See [ROADMAP.md](ROADMAP.md).
 
@@ -23,7 +26,7 @@ The checked-in development and validation labels are **synthetic oracle labels**
 Requirements: Python 3.12 or 3.13 and `uv`.
 
 ```bash
-uv sync --extra dev
+uv sync --extra dev --extra service
 uv run evalmut generate-dataset --output-dir data
 uv run evalmut validate-dataset data/development.jsonl data/validation.jsonl data/challenge.jsonl
 uv run evalmut run \
@@ -57,6 +60,10 @@ export EVALMUT_MODEL='openai/your-model-id'
 export EVALMUT_API_BASE='http://127.0.0.1:8000/v1'  # optional
 uv run evalmut run --dataset data/development.jsonl --adapter pairwise
 ```
+
+Runs support `--concurrency 4 --timeout-seconds 60`. Pair failures are recorded
+and cannot be scored as successful observations. Provider retries are disabled
+on the async path; unknown provider cost is reported as unavailable.
 
 Provider API keys are read by LiteLLM from the environment. They are never accepted as CLI values or written to manifests.
 

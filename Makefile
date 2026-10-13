@@ -1,7 +1,7 @@
 .PHONY: install generate lint typecheck test verify smoke schemas site
 
 install:
-	uv sync --extra dev
+	uv sync --extra dev --extra service
 
 generate:
 	uv run evalmut generate-dataset --output-dir data

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import subprocess
 import uuid
@@ -13,9 +14,10 @@ import yaml
 from .adapters import load_adapter
 from .annotation import agreement_report, export_label_studio_tasks
 from .dataset import BENCHMARK_VERSION, validate_split_isolation, write_dataset
+from .execution import evaluate_pairs
 from .io import dataset_sha256, load_pairs, load_predictions, write_json, write_jsonl
 from .metrics import cluster_bootstrap_ci, score_predictions
-from .models import EvaluatorPrediction, FailureFamily, HumanJudgment, RunManifest
+from .models import HumanJudgment, RunManifest
 from .report import write_report
 from .submission import validate_submission as check_submission
 
@@ -90,30 +92,19 @@ def run(
     config: Annotated[Path | None, typer.Option("--config")] = None,
     model: Annotated[str | None, typer.Option("--model")] = None,
     seed: Annotated[int, typer.Option("--seed")] = 42,
+    concurrency: Annotated[int, typer.Option("--concurrency", min=1, max=32)] = 4,
+    timeout_seconds: Annotated[float, typer.Option("--timeout-seconds", min=0.001, max=600)] = 60,
 ) -> None:
     pairs = load_pairs(dataset)
+    if not pairs or len({pair.split for pair in pairs}) != 1:
+        raise typer.BadParameter("run requires a nonempty dataset with exactly one split")
     adapter_config = _config(config)
     if model:
         adapter_config["model"] = model
     evaluator = load_adapter(adapter, adapter_config)
-    predictions: list[EvaluatorPrediction] = []
-    for pair in pairs:
-        try:
-            predictions.append(evaluator.evaluate(pair))
-        except Exception as exc:
-            predictions.append(
-                EvaluatorPrediction(
-                    pair_id=pair.pair_id,
-                    regression_probability=0.5,
-                    predicted_regression=False,
-                    predicted_failure_family=FailureFamily.NONE,
-                    predicted_severity=0,
-                    explanation="Evaluation failed.",
-                    evidence_paths=[],
-                    latency_ms=0.0,
-                    error=f"{type(exc).__name__}: {exc}",
-                )
-            )
+    predictions = asyncio.run(
+        evaluate_pairs(pairs, evaluator, concurrency=concurrency, timeout_seconds=timeout_seconds)
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     write_jsonl(output_dir / "predictions.jsonl", predictions)
     manifest = RunManifest(
@@ -121,13 +112,13 @@ def run(
         run_id=str(uuid.uuid4()),
         adapter=evaluator.name,
         adapter_version=evaluator.version,
-        model=model,
+        model=adapter_config.get("model") or getattr(evaluator, "model", None),
         dataset_sha256=dataset_sha256(dataset),
         dataset_split=pairs[0].split,
         seed=seed,
         created_at=datetime.now(UTC).isoformat(),
         git_commit=_git_commit(),
-        config=adapter_config,
+        config={**adapter_config, "concurrency": concurrency, "timeout_seconds": timeout_seconds},
     )
     write_json(output_dir / "manifest.json", manifest.model_dump(mode="json"))
     errors = sum(item.error is not None for item in predictions)

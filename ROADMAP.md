@@ -7,6 +7,30 @@
 - deterministic and structured LLM adapter paths;
 - statistics, reports, schemas, tests, CI, annotation workflow.
 
+## Service engineering — implemented and separately verified
+
+- typed FastAPI submission and status API with bearer authentication;
+- durable PostgreSQL/SQLAlchemy queue and independent async worker;
+- idempotent requests, atomic claims, expiring leases, and stale-owner fencing;
+- bounded concurrency, pair/run deadlines, cancellation, and sanitized errors;
+- refusal to score failed/missing/duplicate predictions;
+- Docker Compose, non-root image, and PostgreSQL integration CI.
+
+See [service guide](docs/service.md) for commands and operational boundaries.
+
+## Service engineering — remaining acceptance work
+
+- Alembic migrations and upgrade/rollback tests before evolving the initial schema;
+- authenticated tenants, quotas, TLS, and API rate limits before public service hosting;
+- OpenTelemetry, backup/restore, result retention, and load/chaos evidence;
+- Helm/Kubernetes deployment only with deployment tests and an operating use case;
+- broker integration only when delivery/routing requirements justify a broker;
+- CPU multiprocessing only for measured CPU bottlenecks.
+
+This project is public code, not claimed production banking experience. Its
+service demonstrates Python backend design; benchmark validity still requires
+the reviewer and external model work below.
+
 ## v0.5 — requires real external work
 
 - three independent reviewers for every pair (900 judgments);

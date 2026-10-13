@@ -79,3 +79,38 @@ class LLMJudgeAdapter(EvaluatorAdapter):
             latency_ms=elapsed,
             cost_usd=cost,
         )
+
+    async def aevaluate(self, pair: TracePair) -> EvaluatorPrediction:
+        from litellm import acompletion, completion_cost
+
+        started = time.perf_counter()
+        response = await acompletion(
+            model=self.model,
+            api_base=self.api_base,
+            temperature=self.temperature,
+            num_retries=0,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": json.dumps(self._payload(pair), ensure_ascii=False)},
+            ],
+            response_format={"type": "json_object"},
+        )
+        content = response.choices[0].message.content
+        if not content:
+            raise ValueError("judge returned an empty response")
+        parsed = json.loads(content)
+        try:
+            cost = float(completion_cost(completion_response=response))
+        except Exception:
+            cost = None
+        return EvaluatorPrediction(
+            pair_id=pair.pair_id,
+            regression_probability=parsed["regression_probability"],
+            predicted_regression=parsed["predicted_regression"],
+            predicted_failure_family=FailureFamily(parsed["predicted_failure_family"]),
+            predicted_severity=parsed["predicted_severity"],
+            explanation=parsed["explanation"],
+            evidence_paths=parsed.get("evidence_paths", []),
+            latency_ms=(time.perf_counter() - started) * 1000,
+            cost_usd=cost,
+        )

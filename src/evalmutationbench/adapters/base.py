@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import importlib
 from abc import ABC, abstractmethod
 from typing import Any
@@ -14,6 +15,14 @@ class EvaluatorAdapter(ABC):
     @abstractmethod
     def evaluate(self, pair: TracePair) -> EvaluatorPrediction:
         """Evaluate one control/candidate trace pair."""
+
+    async def aevaluate(self, pair: TracePair) -> EvaluatorPrediction:
+        """Compatibility path; sync plugins must be thread safe and bound their own I/O.
+
+        Cancelling a thread await cannot terminate underlying synchronous work.
+        Network adapters should override this with cancellable native async I/O.
+        """
+        return await asyncio.to_thread(self.evaluate, pair)
 
 
 def load_adapter(spec: str, config: dict[str, Any] | None = None) -> EvaluatorAdapter:

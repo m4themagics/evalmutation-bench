@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: evalmut
+      POSTGRES_USER: evalmut
+      POSTGRES_PASSWORD: ${EVALMUT_DB_PASSWORD:?Set EVALMUT_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evalmut -d evalmut"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  init:
+    build: .
+    command: ["evalmut-db"]
+    environment: &service-environment
+      EVALMUT_DATABASE_URL: postgresql+asyncpg://evalmut:${EVALMUT_DB_PASSWORD}@db:5432/evalmut
+      EVALMUT_SERVICE_TOKEN: ${EVALMUT_SERVICE_TOKEN:?Set a service token of at least 32 characters}
+      EVALMUT_MODEL: ${EVALMUT_MODEL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    build: .
+    environment: *service-environment
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  worker:
+    build: .
+    command: ["evalmut-worker"]
+    environment: *service-environment
+    depends_on:
+      init:
+        condition: service_completed_successfully
+volumes:
+  postgres-data:

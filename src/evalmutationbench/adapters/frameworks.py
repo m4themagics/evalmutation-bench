@@ -38,3 +38,8 @@ class FrameworkJudgeAdapter(EvaluatorAdapter):
         prediction = self._delegate.evaluate(pair)
         prediction.explanation = f"{self.framework}-compat: {prediction.explanation}"
         return prediction
+
+    async def aevaluate(self, pair: TracePair) -> EvaluatorPrediction:
+        prediction = await self._delegate.aevaluate(pair)
+        prediction.explanation = f"{self.framework}-compat: {prediction.explanation}"
+        return prediction

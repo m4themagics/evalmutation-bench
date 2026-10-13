@@ -56,6 +56,14 @@ def _ece(gold: np.ndarray, probability: np.ndarray, bins: int = 10) -> float:
 def score_predictions(
     pairs: Sequence[TracePair], predictions: Sequence[EvaluatorPrediction]
 ) -> dict[str, Any]:
+    if not pairs or not any(pair.gold is not None for pair in pairs):
+        raise ValueError("scoring requires labeled pairs")
+    if len({pair.pair_id for pair in pairs}) != len(pairs):
+        raise ValueError("duplicate dataset pair IDs")
+    if len({prediction.pair_id for prediction in predictions}) != len(predictions):
+        raise ValueError("duplicate prediction pair IDs")
+    if any(prediction.error is not None for prediction in predictions):
+        raise ValueError("failed predictions cannot be scored; complete the run first")
     labeled = {pair.pair_id: pair for pair in pairs if pair.gold is not None}
     prediction_map = {prediction.pair_id: prediction for prediction in predictions}
     missing = sorted(set(labeled) - set(prediction_map))
@@ -128,6 +136,9 @@ def cluster_bootstrap_ci(
     samples: int = 1000,
     seed: int = 42,
 ) -> dict[str, float]:
+    if samples < 1:
+        raise ValueError("bootstrap samples must be positive")
+    score_predictions(pairs, predictions)
     groups: dict[str, list[TracePair]] = defaultdict(list)
     for pair in pairs:
         if pair.gold is not None:
